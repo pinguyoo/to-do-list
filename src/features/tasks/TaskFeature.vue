@@ -1,5 +1,8 @@
 <template>
-  <sort-options :options="SORT_OPTIONS" :activeOption="sortBy" @sort="onSort" />
+  <div :class="$style['options-section']">
+    <filter-options :options="FILTER_OPTIONS" :activeOption="filterStatus" @filter="onFilter" />
+    <sort-options :options="SORT_OPTIONS" :activeOption="sortBy" @sort="onSort" />
+  </div>
   <div :class="$style['task-list']">
     <task-card
       v-for="task in paginatedTasks"
@@ -25,22 +28,20 @@ import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { Task } from '@/features/tasks/types'
 import TaskCard from '@/features/tasks/components/TaskCard'
+import FilterOptions from '@/components/FilterOptions'
 import SortOptions from '@/components/SortOptions'
-import { SORT_OPTIONS } from './constants'
+import { FILTER_OPTIONS, SORT_OPTIONS } from './constants'
 
 const { dispatch, getters } = useStore()
 const loading = ref(false)
 const currentPage = computed(() => getters['tasks/currentPage'])
-const tasks = computed(() => getters['tasks/tasks'])
-const pageSize = computed(() => getters['tasks/pageSize'])
-const totalPages = computed(() => {
-  return Math.ceil(tasks.value.length / pageSize.value)
-})
+const totalPages = computed(() => getters['tasks/totalPages'])
 const paginatedTasks = computed(() => getters['tasks/paginatedTasks'])
 const sortBy = computed(() => getters['tasks/sortBy'])
+const filterStatus = computed(() => getters['tasks/filterStatus'])
 const updateTask = (task: Task) => dispatch('tasks/updateTask', task)
 const deleteTask = (id: number) => dispatch('tasks/deleteTask', id)
-const setPage = (page) => dispatch('tasks/setPage', page)
+const setPage = (page: number) => dispatch('tasks/setPage', page)
 const onPreviousClick = () => {
   if (currentPage.value > 1) {
     setPage(currentPage.value - 1)
@@ -53,6 +54,7 @@ const onNextClick = () => {
 }
 
 const onSort = (option: string) => dispatch('tasks/setSortBy', option)
+const onFilter = (option: string) => dispatch('tasks/setFilterStatus', option)
 
 onMounted(async () => {
   loading.value = true
@@ -61,6 +63,12 @@ onMounted(async () => {
 })
 </script>
 <style module>
+  .options-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .task-list {
     display: flex;
     flex-direction: column;
