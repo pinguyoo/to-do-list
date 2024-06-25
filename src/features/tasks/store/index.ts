@@ -49,7 +49,7 @@ const mutations = {
     state.tasks.push(task)
   },
   UPDATE_TASK (state: State, updatedTask: Task) {
-    const taskIndex = state.tasks.findIndex(task => task.id === updatedTask.id)
+    const taskIndex = state.tasks.findIndex(task => Number(task.id) === Number(updatedTask.id))
     if (taskIndex === -1) return
     state.tasks.splice(taskIndex, 1, updatedTask)
   },
