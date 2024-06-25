@@ -3,6 +3,7 @@
     <filter-options :options="FILTER_OPTIONS" :activeOption="filterStatus" @filter="onFilter" />
     <sort-options :options="SORT_OPTIONS" :activeOption="sortBy" @sort="onSort" />
   </div>
+  <add-task></add-task>
   <div :class="$style['task-list']">
     <task-card
       v-for="task in paginatedTasks"
@@ -13,7 +14,7 @@
     />
   </div>
   <div v-if="loading" class="loading">Loading...</div>
-  <div :class="$style.pagination">
+  <div v-if="totalPages" :class="$style.pagination">
     <button @click="onPreviousClick" :disabled="currentPage === 1">
       <img :class="$style.arrow" src="@/assets/arrow-left.svg" alt="Previous page" />
     </button>
@@ -30,6 +31,7 @@ import { Task } from '@/features/tasks/types'
 import TaskCard from '@/features/tasks/components/TaskCard'
 import FilterOptions from '@/components/FilterOptions'
 import SortOptions from '@/components/SortOptions'
+import AddTask from '@/features/tasks/components/AddTask'
 import { FILTER_OPTIONS, SORT_OPTIONS } from './constants'
 
 const { dispatch, getters } = useStore()
