@@ -1,4 +1,5 @@
 <template>
+  <sort-options :options="SORT_OPTIONS" :activeOption="sortBy" @sort="onSort" />
   <div :class="$style['task-list']">
     <task-card
       v-for="task in paginatedTasks"
@@ -24,6 +25,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { Task } from '@/features/tasks/types'
 import TaskCard from '@/features/tasks/components/TaskCard'
+import SortOptions from '@/components/SortOptions'
+import { SORT_OPTIONS } from './constants'
 
 const { dispatch, getters } = useStore()
 const loading = ref(false)
@@ -33,11 +36,8 @@ const pageSize = computed(() => getters['tasks/pageSize'])
 const totalPages = computed(() => {
   return Math.ceil(tasks.value.length / pageSize.value)
 })
-const paginatedTasks = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return tasks.value.slice(start, end)
-})
+const paginatedTasks = computed(() => getters['tasks/paginatedTasks'])
+const sortBy = computed(() => getters['tasks/sortBy'])
 const updateTask = (task: Task) => dispatch('tasks/updateTask', task)
 const deleteTask = (id: number) => dispatch('tasks/deleteTask', id)
 const setPage = (page) => dispatch('tasks/setPage', page)
@@ -51,6 +51,8 @@ const onNextClick = () => {
     setPage(currentPage.value + 1)
   }
 }
+
+const onSort = (option: string) => dispatch('tasks/setSortBy', option)
 
 onMounted(async () => {
   loading.value = true
