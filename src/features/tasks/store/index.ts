@@ -1,13 +1,16 @@
 import { createTask, deleteTask, fetchTasks, updateTask } from '@/features/tasks/services'
-import type { SortOption } from '@/types'
+import type { FilterStatus, SortOption } from '@/types'
 import type { Task } from '@/features/tasks/types'
 import getSortedItems from './utils/get-sorted-items'
+import getFilteredItems from './utils/get-filtered-items'
 
 interface State {
   tasks: Task[]
   pageSize: number;
   currentPage: number;
   sortBy: SortOption;
+  filterStatus: FilterStatus;
+  filterKeyword: string;
 }
 
 type Commit = (key: string, ...args: unknown[]) => void
@@ -16,17 +19,22 @@ const state: State = {
   tasks: [],
   pageSize: 2,
   currentPage: 1,
-  sortBy: 'newest'
+  sortBy: 'newest',
+  filterStatus: 'all',
+  filterKeyword: ''
 }
 
 const getters = {
   tasks: (state: State) => state.tasks,
-  pageSize: (state: State) => state.pageSize,
   currentPage: (state: State) => state.currentPage,
+  totalPages: (state: State, getters: { filteredTasks: Task[] }) =>
+    Math.ceil(getters.filteredTasks.length / state.pageSize),
   sortBy: (state: State) => state.sortBy,
-  sortedTasks: (state: State) => getSortedItems({ originItems: state.tasks, sortBy: state.sortBy }),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  paginatedTasks: (state: State, getters: any) => {
+  filterStatus: (state: State) => state.filterStatus,
+  filteredTasks: (state: State) => getFilteredItems({ originItems: state.tasks, status: state.filterStatus }),
+  sortedTasks: (state: State, getters: { filteredTasks: Task[] }) =>
+    getSortedItems({ originItems: getters.filteredTasks, sortBy: state.sortBy }),
+  paginatedTasks: (state: State, getters: { sortedTasks: Task[] }) => {
     const start = (state.currentPage - 1) * state.pageSize
     const end = start + state.pageSize
     return getters.sortedTasks.slice(start, end)
@@ -53,6 +61,12 @@ const mutations = {
   },
   SET_SORT_BY (state: State, sortBy: SortOption) {
     state.sortBy = sortBy
+  },
+  SET_FILTER_STATUS (state: State, filterStatus: FilterStatus) {
+    state.filterStatus = filterStatus
+  },
+  SET_FILTER_KEYWORD (state: State, filterKeyword: string) {
+    state.filterKeyword = filterKeyword
   }
 }
 
@@ -79,6 +93,13 @@ const actions = {
   setSortBy ({ commit }: { commit: Commit }, sortBy: SortOption) {
     commit('SET_SORT_BY', sortBy)
     commit('SET_PAGE', 1)
+  },
+  setFilterStatus ({ commit }: { commit: Commit }, filterStatus: FilterStatus) {
+    commit('SET_FILTER_STATUS', filterStatus)
+    commit('SET_PAGE', 1)
+  },
+  setFilterKeyword ({ commit }: { commit: Commit }, filterKeyword: string) {
+    commit('SET_FILTER_KEYWORD', filterKeyword)
   }
 }
 
