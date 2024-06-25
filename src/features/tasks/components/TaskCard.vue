@@ -57,6 +57,10 @@ const onDescriptionSave = () => {
 }
 
 const onDescriptionBlur = () => {
+  emit('update-task', {
+    ...props.task,
+    description: editableDescription.value
+  })
   isEditing.value = false
 }
 

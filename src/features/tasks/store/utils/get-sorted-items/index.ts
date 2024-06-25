@@ -1,6 +1,6 @@
 import type { Item, SortOption } from './types'
 
-export default <T extends Item>({ originItems, sortBy }: { originItems: T[]; sortBy: SortOption }) => {
+export default <T extends Item>({ originItems = [], sortBy }: { originItems: T[]; sortBy: SortOption }) => {
   const sortedTasks = [...originItems]
   const sortedCompareFnMap = {
     newest: (a: T, b: T) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
