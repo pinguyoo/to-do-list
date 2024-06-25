@@ -1,10 +1,13 @@
 import { createTask, deleteTask, fetchTasks, updateTask } from '@/features/tasks/services'
-import { Task } from '@/features/tasks/types'
+import type { SortOption } from '@/types'
+import type { Task } from '@/features/tasks/types'
+import getSortedItems from './utils/get-sorted-items'
 
 interface State {
   tasks: Task[]
   pageSize: number;
   currentPage: number;
+  sortBy: SortOption;
 }
 
 type Commit = (key: string, ...args: unknown[]) => void
@@ -12,13 +15,22 @@ type Commit = (key: string, ...args: unknown[]) => void
 const state: State = {
   tasks: [],
   pageSize: 2,
-  currentPage: 1
+  currentPage: 1,
+  sortBy: 'newest'
 }
 
 const getters = {
   tasks: (state: State) => state.tasks,
   pageSize: (state: State) => state.pageSize,
-  currentPage: (state: State) => state.currentPage
+  currentPage: (state: State) => state.currentPage,
+  sortBy: (state: State) => state.sortBy,
+  sortedTasks: (state: State) => getSortedItems({ originItems: state.tasks, sortBy: state.sortBy }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  paginatedTasks: (state: State, getters: any) => {
+    const start = (state.currentPage - 1) * state.pageSize
+    const end = start + state.pageSize
+    return getters.sortedTasks.slice(start, end)
+  }
 }
 
 const mutations = {
@@ -38,6 +50,9 @@ const mutations = {
   },
   SET_PAGE (state: State, page: number) {
     state.currentPage = page
+  },
+  SET_SORT_BY (state: State, sortBy: SortOption) {
+    state.sortBy = sortBy
   }
 }
 
@@ -60,6 +75,10 @@ const actions = {
   },
   setPage ({ commit }: { commit: Commit }, currentPage: number) {
     commit('SET_PAGE', currentPage)
+  },
+  setSortBy ({ commit }: { commit: Commit }, sortBy: SortOption) {
+    commit('SET_SORT_BY', sortBy)
+    commit('SET_PAGE', 1)
   }
 }
 

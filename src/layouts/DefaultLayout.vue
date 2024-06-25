@@ -30,8 +30,6 @@ import FooterComponent from '@/components/FooterComponent'
 
 .content {
   flex: 1;
-  margin-top: 60px;
-  margin-bottom: 60px;
   width: 100%;
   z-index: 1;
 }
